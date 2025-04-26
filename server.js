@@ -16,7 +16,7 @@ app.use(cors({
   credentials: true, // Allow cookies and other credentials
 }));
 
-
+app.use(cors());
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,

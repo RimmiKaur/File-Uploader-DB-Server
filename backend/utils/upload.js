@@ -42,6 +42,7 @@ const fileExistsInDirectory = async (filePath) => {
 
 // Controller to handle file upload
 const uploadFile = async (req, res) => {
+    console.log("eededferdf");
     if (!req.files || req.files.length === 0) {
       return res.status(400).send("No files uploaded");
     }
@@ -60,7 +61,7 @@ const uploadFile = async (req, res) => {
   
       const fileExistsInDb = await File.findOne({ filename: file.filename }).exec();
   
-      return { file, fileExistsInDirectory, fileExistsInDb };
+      return {  fileExistsInDb };
     });
   
     try {
