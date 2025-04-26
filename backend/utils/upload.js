@@ -58,7 +58,7 @@ const uploadFile = async (req, res) => {
 
     // Check for existing files in the uploads folder and database
     const fileExistencePromises = filesToCheck.map(async (file) => {
-        const filePath = path.join(__dirname, `../uploads/${file.filename}`);
+        const filePath = path.join(__dirname, `../../uploads/${file.filename}`);
 
         // Check if the file exists in the directory
         const fileExistsInDirectoryResult = await fileExistsInDirectory(filePath);
