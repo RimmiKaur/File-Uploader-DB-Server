@@ -54,23 +54,15 @@ const uploadFile = async (req, res) => {
     }));
   
     const fileExistencePromises = filesToCheck.map(async (file) => {
-      const filePath = path.join(__dirname, `../../uploads/${file.filename}`);
-      const fileExistsInDirectory = await fs.promises.access(filePath, fs.constants.F_OK)
-        .then(() => true)
-        .catch(() => false);
-  
       const fileExistsInDb = await File.findOne({ filename: file.filename }).exec();
-  
-      return {  fileExistsInDb };
+      return { file, fileExistsInDb };
     });
   
     try {
       const results = await Promise.all(fileExistencePromises);
-  
       for (let result of results) {
-        const { file, fileExistsInDirectory, fileExistsInDb } = result;
-  
-        if (fileExistsInDirectory || fileExistsInDb) {
+        const { file, fileExistsInDb } = result;
+        if (fileExistsInDb) {
           return res.status(400).send(`File ${file.originalname} already exists`);
         }
       }

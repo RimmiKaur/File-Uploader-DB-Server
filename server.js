@@ -9,12 +9,26 @@ require("dotenv").config();
 const app = express();
 
 // Enable CORS with detailed settings
-app.use(cors({
-  origin: "https://files-uploader-db.vercel.app", // Your frontend URL
-  methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"], // Add other HTTP methods if necessary
-  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers (like Authorization if needed)
-  credentials: true, // Allow cookies and other credentials
-}));
+const allowedOrigins = [
+    "https://files-uploader-db.vercel.app", // production URL
+    "http://localhost:3000", // development URL
+  ];
+  
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+          // Allow requests from localhost (no origin) and production URL
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
+      credentials: true, // Allow cookies or credentials
+    })
+  );
+  
 
 app.use(cors());
 // MongoDB connection
