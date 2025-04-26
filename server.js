@@ -7,11 +7,15 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
+
+// Enable CORS with detailed settings
 app.use(cors({
-    origin: "https://files-uploader-db.vercel.app/", // Change this to your frontend URL
-    methods: ["GET", "POST", "DELETE"],
-    allowedHeaders: ["Content-Type"],
-  }));
+  origin: "https://files-uploader-db.vercel.app", // Your frontend URL
+  methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"], // Add other HTTP methods if necessary
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers (like Authorization if needed)
+  credentials: true, // Allow cookies and other credentials
+}));
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
