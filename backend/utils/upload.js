@@ -51,14 +51,16 @@ const uploadFile = async (req, res) => {
         originalname: file.originalname,
     }));
 
-    const uploadsDir = path.join(__dirname, '../uploads');
+    const uploadsDir = path.join(__dirname, '../../uploads');
     if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir); // Create uploads folder if not present
+        fs.mkdirSync(uploadsDir);
+        console.log("Created"); // Create uploads folder if not present
     }
 
     // Check for existing files in the uploads folder and database
     const fileExistencePromises = filesToCheck.map(async (file) => {
         const filePath = path.join(__dirname, `../../uploads/${file.filename}`);
+        console.log("got it");
 
         // Check if the file exists in the directory
         const fileExistsInDirectoryResult = await fileExistsInDirectory(filePath);
