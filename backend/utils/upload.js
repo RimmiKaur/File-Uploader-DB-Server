@@ -42,69 +42,54 @@ const fileExistsInDirectory = async (filePath) => {
 
 // Controller to handle file upload
 const uploadFile = async (req, res) => {
-    if(req.file){
-        return res.status(400).send("No files uploadasfsdfsdfsddfs");
-
-    }
     if (!req.files || req.files.length === 0) {
-        return res.status(400).send("No files uploaded");
+      return res.status(400).send("No files uploaded");
     }
-
+  
+    // Process and check for duplicate files
     const filesToCheck = req.files.map((file) => ({
-        filename: file.filename,
-        originalname: file.originalname,
+      filename: file.filename,
+      originalname: file.originalname,
     }));
-
-    const uploadsDir = path.join(__dirname, '../../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir);
-        console.log("Created"); // Create uploads folder if not present
-    }
-
-    // Check for existing files in the uploads folder and database
+  
     const fileExistencePromises = filesToCheck.map(async (file) => {
-        const filePath = path.join(__dirname, `../../uploads/${file.filename}`);
-        console.log("got it");
-
-        // Check if the file exists in the directory
-        const fileExistsInDirectoryResult = await fileExistsInDirectory(filePath);
-
-        // Check if the file exists in the database
-        const fileExistsInDb = await File.findOne({ filename: file.filename }).exec();
-
-        return {
-            file,
-            fileExistsInDirectory: fileExistsInDirectoryResult,
-            fileExistsInDb: fileExistsInDb,
-        };
+      const filePath = path.join(__dirname, `../../uploads/${file.filename}`);
+      const fileExistsInDirectory = await fs.promises.access(filePath, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
+  
+      const fileExistsInDb = await File.findOne({ filename: file.filename }).exec();
+  
+      return { file, fileExistsInDirectory, fileExistsInDb };
     });
-
+  
     try {
-        const results = await Promise.all(fileExistencePromises);
-
-        // Check if any file exists in either the directory or the database
-        for (let result of results) {
-            const { file, fileExistsInDirectory, fileExistsInDb } = result;
-
-            if (fileExistsInDirectory || fileExistsInDb) {
-                return res.status(400).send(`File ${file.originalname} already exists`);
-            }
+      const results = await Promise.all(fileExistencePromises);
+  
+      for (let result of results) {
+        const { file, fileExistsInDirectory, fileExistsInDb } = result;
+  
+        if (fileExistsInDirectory || fileExistsInDb) {
+          return res.status(400).send(`File ${file.originalname} already exists`);
         }
-
-        // Process files only if they pass the validation
-        const filesData = req.files.map((file) => ({
-            filename: file.filename,
-            sizeMB: file.size / (1024 * 1024), // Convert size to MB
-            uploadedAt: new Date(),
-        }));
-
-        // Save file metadata to the database
-        await File.insertMany(filesData);
-        res.status(200).send("Files uploaded successfully");
+      }
+  
+      // Proceed with saving the file metadata to the database
+      const filesData = req.files.map((file) => ({
+        filename: file.filename,
+        sizeMB: file.size / (1024 * 1024), // Convert size to MB
+        uploadedAt: new Date(),
+      }));
+  
+      await File.insertMany(filesData);
+      res.status(200).send("Files uploaded successfully");
+  
     } catch (err) {
-        return res.status(500).send("Error checking file existence or saving metadata");
+      return res.status(500).send("Error checking file existence or saving metadata");
     }
-};
+  };
+  
+
 
 // Middleware to handle file upload error (Multer)
 const handleMulterError = (err, req, res, next) => {
