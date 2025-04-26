@@ -102,6 +102,7 @@ const handleMulterError = (err, req, res, next) => {
         if (err.code === "LIMIT_FILE_COUNT") {
             return res.status(400).send("Too many files uploaded. Maximum 5 files are allowed.");
         }
+        console.log("sdfsdfdsfsdfds");
         return res.status(400).send(err.message); // Handle other Multer errors
     }
 
